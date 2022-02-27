@@ -1,5 +1,5 @@
 name: build rpm
-on: [push, pullrequest]
+on: [push]
 jobs:
   steps:
     - name: init
