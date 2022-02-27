@@ -1,12 +1,11 @@
 name: build rpm
 on: [push]
 jobs:
-  steps:
-    - name: init
-      run: gem install package_cloud
-    
-    - name: build
-      run: echo make rpm
-
-    - name: publish
-      run: package_cloud push tizitomm/cardano cardano-node.rpm
+  BuildRPM:
+    runs-on: rocky-latest
+    steps:
+      - name: build
+        run: | 
+          gem install package_cloud
+          echo make rpm
+          package_cloud push tizitomm/cardano cardano-node.rpm
