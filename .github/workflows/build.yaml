@@ -8,5 +8,5 @@ jobs:
     - name: build
       run: echo make rpm
 
-    - name: publish:
+    - name: publish
       run: package_cloud push tizitomm/cardano cardano-node.rpm
