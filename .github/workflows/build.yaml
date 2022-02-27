@@ -2,6 +2,7 @@ name: build rpm
 on: [push]
 jobs:
   BuildRPM:
+    runs-on: ubuntu-latest
     container: rockylinux:latest
     steps:
       - name: build
