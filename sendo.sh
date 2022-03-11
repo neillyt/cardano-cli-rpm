@@ -6,11 +6,14 @@
 
 # set some defaults
 output_dir="/tmp"
+min_amount_to_send=1000000
 
 function show_wallet() {
   utxo=$(cardano-cli query utxo --testnet-magic "${TESTNET_MAGIC}" --address "${address}")
   txs=0
   balance=0
+  echo -e
+  echo "${utxo}" | grep -v "[0-9]"
   while read line; do
     echo "${line}"
     txs=$(( txs + 1 ))
@@ -32,22 +35,23 @@ function usage() {
 
   send \$ADA from a wallet to one other wallet.
 
+  -c)  denominator; ada or lovelace 1,000,000 lovelace = 1 ada (default: lovelace)
   -b)  show sending wallet balance (works with -f)
   -t)  wallet to send to
   -f)  wallet to send from
   -k)  signing key for wallet to send from
   -a)  amount to send
-  -o)  output directory where transactions files are written to (default ${output_dir})
+  -o)  output directory where transactions files are written to (default: ${output_dir})
   -h)  you're lookin' at it
 
         EOM
   exit 2
 }
 
-
-while getopts "bt:f:k:a:d:h" options; do
+while getopts "bc:t:f:k:a:d:h" options; do
   case "${options}" in
     b) show_wallet;;
+    c) denominator="${OPTARG}";;
     t) to_address="${OPTARG}";;
     f) address="${OPTARG}";;
     k) signing_key_file="${OPTARG}";;
@@ -62,6 +66,10 @@ done
 #echo $output_dir
 #echo $address
 #echo $to_address
+
+if [[ "${denominator}" == "ada" ]]; then
+  amount_to_send=$(echo "${amount_to_send} * 1000000" | bc -l)
+fi
 
 # lint stuff
 if [ -z "${to_address}" ]; then
@@ -82,6 +90,11 @@ fi
 if [ -z "${amount_to_send}" ]; then
   fail=true
   echo "-a cannot be empty, specify an amount of lovelace to send"
+fi
+
+if [[ "${amount_to_send}" -lt "${min_amount_to_send}" ]]; then
+  fail=true
+  echo "minimum amount to send is ${min_amount_to_send}, you sent: ${amount_to_send}. cheapskate."
 fi
 
 if [[ "${fail}" == "true" ]]; then
